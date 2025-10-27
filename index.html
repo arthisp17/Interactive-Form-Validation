@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Enhanced Multi-Page Form</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .form-container {
+      background: #fff;
+      border: 2px solid #3498db;
+      border-radius: 10px;
+      padding: 30px 40px;
+      width: 500px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #3498db;
+    }
+
+    h3 {
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    .form-step {
+      display: none;
+    }
+
+    .form-step.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .error {
+      color: #e74c3c;
+      font-size: 0.85em;
+      margin-top: 4px;
+    }
+
+    .success {
+      color: #27ae60;
+      font-size: 1em;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .navigation-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: #3498db;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #2980b9;
+    }
+
+    .summary {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 6px;
+      font-size: 0.95em;
+    }
+
+    .summary p {
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h2>Multi-Page Form</h2>
+    <form id="multiStepForm">
+      <!-- Step 1: Personal Info -->
+      <div class="form-step active" id="step1">
+        <h3>Step 1: Personal Info</h3>
+        <div class="form-group">
+          <label>Name:</label>
+          <input type="text" id="name">
+          <div class="error" id="nameError"></div>
+        </div>
+        <div class="form-group">
+          <label>Email:</label>
+          <input type="email" id="email">
+          <div class="error" id="emailError"></div>
+        </div>
+        <div class="form-group">
+          <label>Phone Number:</label>
+          <input type="tel" id="phone">
+        </div>
+        <div class="form-group">
+          <label>Address:</label>
+          <textarea id="address" rows="2"></textarea>
+        </div>
+      </div>
+
+      <!-- Step 2: Account Info -->
+      <div class="form-step" id="step2">
+        <h3>Step 2: Account Info</h3>
+        <div class="form-group">
+          <label>Username:</label>
+          <input type="text" id="username">
+          <div class="error" id="usernameError"></div>
+        </div>
+        <div class="form-group">
+          <label>Password:</label>
+          <input type="password" id="password">
+          <div class="error" id="passwordError"></div>
+        </div>
+        <div class="form-group">
+          <label>Confirm Password:</label>
+          <input type="password" id="confirmPassword">
+          <div class="error" id="confirmPasswordError"></div>
+        </div>
+      </div>
+
+      <!-- Step 3: Confirmation -->
+      <div class="form-step" id="step3">
+        <h3>Step 3: Confirmation</h3>
+        <div class="summary" id="summaryBox"></div>
+        <div class="success" id="successMessage"></div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="navigation-buttons">
+        <button type="button" id="prevBtn">Previous</button>
+        <button type="button" id="nextBtn">Next</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    let currentStep = 1;
+    const steps = document.querySelectorAll(".form-step");
+    const nextBtn = document.getElementById("nextBtn");
+    const prevBtn = document.getElementById("prevBtn");
+
+    function showStep(step) {
+      steps.forEach((s, index) => {
+        s.classList.toggle("active", index === step - 1);
+      });
+      prevBtn.style.display = step === 1 ? "none" : "inline-block";
+      nextBtn.textContent = step === steps.length ? "Submit" : "Next";
+      if (step === steps.length) displaySummary();
+    }
+
+    function validateStep(step) {
+      let valid = true;
+      if (step === 1) {
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        document.getElementById("nameError").textContent = name ? "" : "Name is required.";
+        document.getElementById("emailError").textContent = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/.test(email) ? "" : "Valid email required.";
+        valid = name && /^[^ ]+@[^ ]+\.[a-z]{2,3}$/.test(email);
+      } else if (step === 2) {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+        document.getElementById("usernameError").textContent = username ? "" : "Username is required.";
+        document.getElementById("passwordError").textContent = password.length >= 6 ? "" : "Password must be at least 6 characters.";
+        document.getElementById("confirmPasswordError").textContent = password === confirmPassword ? "" : "Passwords do not match.";
+        valid = username && password.length >= 6 && password === confirmPassword;
+      }
+      return valid;
+    }
+
+    function displaySummary() {
+      const summaryBox = document.getElementById("summaryBox");
+      summaryBox.innerHTML = `
+        <p><strong>Name:</strong> ${document.getElementById("name").value}</p>
+        <p><strong>Email:</strong> ${document.getElementById("email").value}</p>
+        <p><strong>Phone:</strong> ${document.getElementById("phone").value}</p>
+        <p><strong>Address:</strong> ${document.getElementById("address").value}</p>
+        <p><strong>Username:</strong> ${document.getElementById("username").value}</p>
+      `;
+    }
+
+    nextBtn.addEventListener("click", () => {
+      if (currentStep < steps.length) {
+        if (validateStep(currentStep)) {
+          currentStep++;
+          showStep(currentStep);
+        }
+      } else {
+        document.getElementById("successMessage").textContent = "🎉 Form submitted successfully!";
+      }
+    });
+
+    prevBtn.addEventListener("click", () => {
+      if (currentStep > 1) {
+        currentStep--;
+        showStep(currentStep);
+      }
+    });
+
+    showStep(currentStep);
+  </script>
+
+</body>
+</html>
